@@ -175,7 +175,8 @@
 
     setLogLevel('Debug');
 
-    const appId = "noprecinho-app";
+    const __app_id = "noprecinho-app";
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     // ATENÇÃO: SUBSTITUA AS SEGUINTES CHAVES PELAS SUAS CHAVES PESSOAIS DO FIREBASE!
     // VOCÊ PODE ENCONTRAR ESSAS CHAVES NA PÁGINA DE CONFIGURAÇÕES DO SEU PROJETO FIREBASE.
     const firebaseConfig = {
