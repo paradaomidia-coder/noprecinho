@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Preço por Unidade</title>
+    <title>No Precinho - Calculadora de Preço por Unidade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,10 +19,10 @@
         }
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 450px;
             background-color: #ffffff;
             border-radius: 1.5rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 2rem;
             text-align: center;
         }
@@ -40,11 +40,12 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
         .result-box {
-            background-color: #d1fae5;
-            color: #059669;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
             border-radius: 1.5rem;
             padding: 1.5rem 1rem;
             margin-top: 2rem;
+            box-shadow: 0 4px 12px rgba(5, 122, 85, 0.15);
         }
         .result-text {
             font-size: 1.25rem;
@@ -65,21 +66,25 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.2s;
+            margin-bottom: 0.75rem;
         }
         .calculation-item:hover {
-            border-color: #a3a3a3;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         .delete-btn {
             background-color: #ef4444;
             color: #fff;
             font-weight: bold;
             border-radius: 0.5rem;
-            padding: 0.5rem;
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
             transition: all 0.2s;
         }
         .delete-btn:hover {
             background-color: #dc2626;
+            transform: scale(1.05);
         }
         .modal-backdrop {
             position: fixed;
@@ -92,42 +97,88 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
         }
         .modal-content {
             background-color: #fff;
             padding: 2rem;
             border-radius: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
             text-align: center;
             max-width: 350px;
             width: 90%;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content {
+            transform: translateY(0);
+        }
+        .best-option {
+            border: 2px solid #10b981;
+            background-color: #ecfdf5;
+        }
+        .best-option-tag {
+            background-color: #10b981;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            margin-left: 0.5rem;
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="user-info" class="text-sm text-gray-400 mb-4 text-left">
-        <p>ID do Usuário: <span id="user-id">Carregando...</span></p>
+    <div class="app-header">
+        <div class="app-icon">$</div>
+        <h1 class="text-3xl font-bold text-gray-800">No Precinho</h1>
     </div>
     
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Preço por Unidade</h1>
+    <div class="mb-6 p-4 bg-blue-50 rounded-xl">
+        <p class="text-sm text-blue-700">Compare preços de produtos com embalagens diferentes e descubra qual opção oferece o melhor custo-benefício!</p>
+    </div>
     
     <div class="mb-4">
         <label for="product-name" class="block text-left text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
-        <input type="text" id="product-name" placeholder="Ex: Arroz, Farinha, Leite" class="w-full">
+        <input type="text" id="product-name" placeholder="Ex: Arroz, Sabão em Pó, Leite" class="w-full">
     </div>
 
     <div class="mb-4">
         <label for="price" class="block text-left text-sm font-medium text-gray-700 mb-1">Preço Total (R$)</label>
-        <input type="number" id="price" placeholder="Ex: 15.50" class="w-full">
+        <input type="number" id="price" placeholder="Ex: 15.50" step="0.01" min="0" class="w-full">
     </div>
 
     <div class="mb-4">
         <label for="quantity" class="block text-left text-sm font-medium text-gray-700 mb-1">Quantidade</label>
         <div class="flex items-center">
-            <input type="number" id="quantity" placeholder="Ex: 500" class="flex-grow rounded-r-none">
-            <select id="unit" class="rounded-l-none text-gray-600">
+            <input type="number" id="quantity" placeholder="Ex: 500" step="0.01" min="0" class="flex-grow rounded-r-none">
+            <select id="unit" class="rounded-l-none text-gray-600 w-24">
                 <option value="kg">kg</option>
                 <option value="g">g</option>
                 <option value="L">L</option>
@@ -142,127 +193,99 @@
         <p id="price-per-unit" class="result-price">R$ 0,00</p>
     </div>
 
-    <div class="flex space-x-2 mt-4">
-        <button id="save-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:-translate-y-1">
+    <div class="flex space-x-2 mt-6">
+        <button id="calculate-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:-translate-y-0.5">
+            📊 Calcular
+        </button>
+        <button id="save-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:-translate-y-0.5">
             💾 Salvar
         </button>
     </div>
     
-    <div id="saved-calculations" class="mt-6 text-left">
-        <h2 class="text-xl font-semibold text-gray-700 mb-2">Seus Cálculos Salvos</h2>
-        <ul id="calculations-list" class="space-y-3"></ul>
+    <div id="saved-calculations" class="mt-8 text-left">
+        <h2 class="text-xl font-semibold text-gray-700 mb-3">Comparações Salvas</h2>
+        <div id="calculations-list" class="space-y-3"></div>
     </div>
 
+    <div class="mt-8 text-center text-sm text-gray-500">
+        <p>✨ Encontre o melhor preço para o seu bolso! ✨</p>
+    </div>
 </div>
 
 <!-- Custom Alert/Modal -->
-<div id="modal-backdrop" class="modal-backdrop hidden">
+<div id="modal-backdrop" class="modal-backdrop">
     <div class="modal-content">
         <h3 id="modal-title" class="font-bold text-lg mb-2"></h3>
         <p id="modal-message" class="text-sm text-gray-600 mb-4"></p>
-        <button id="modal-close" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+        <button id="modal-close" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
             OK
         </button>
     </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-
-    setLogLevel('Debug');
-
-    const __app_id = "noprecinho-app";
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    // ATENÇÃO: SUBSTITUA AS SEGUINTES CHAVES PELAS SUAS CHAVES PESSOAIS DO FIREBASE!
-    // VOCÊ PODE ENCONTRAR ESSAS CHAVES NA PÁGINA DE CONFIGURAÇÕES DO SEU PROJETO FIREBASE.
+    // Configuração do Firebase - SUBSTITUA com suas próprias credenciais
     const firebaseConfig = {
-        apiKey: "AIzaSyB-wsClf0DUF0adE94Go3pjsPt-CyDjXf8",
-        authDomain: "noprecinho-app.firebaseapp.com",
-        projectId: "noprecinho-app",
-        storageBucket: "noprecinho-app.firebasestorage.app",
-        messagingSenderId: "525892782479",
-        appId: "1:525892782479:web:fa4b83597360cf8b61a3fa",
-        measurementId: "G-E0NQD2SPHH"
+        apiKey: "SUA_API_KEY",
+        authDomain: "SEU_PROJETO.firebaseapp.com",
+        projectId: "SEU_PROJETO",
+        storageBucket: "SEU_PROJETO.firebasestorage.app",
+        messagingSenderId: "SEU_SENDER_ID",
+        appId: "SEU_APP_ID"
     };
 
-    const initialAuthToken = undefined;
-
-    let db;
-    let auth;
-    let userId;
-
+    // Elementos da DOM
     const priceInput = document.getElementById('price');
     const quantityInput = document.getElementById('quantity');
     const unitSelect = document.getElementById('unit');
     const productNameInput = document.getElementById('product-name');
+    const calculateBtn = document.getElementById('calculate-btn');
     const saveBtn = document.getElementById('save-btn');
     const resultDiv = document.getElementById('result');
     const pricePerUnitSpan = document.getElementById('price-per-unit');
     const calculationsList = document.getElementById('calculations-list');
-    const userIdDisplay = document.getElementById('user-id');
-
     const modalBackdrop = document.getElementById('modal-backdrop');
     const modalTitle = document.getElementById('modal-title');
     const modalMessage = document.getElementById('modal-message');
     const modalCloseBtn = document.getElementById('modal-close');
 
+    // Estado da aplicação
+    let currentCalculation = null;
+    let savedCalculations = [];
+
+    // Função para mostrar modal
     function showModal(title, message) {
         modalTitle.textContent = title;
         modalMessage.textContent = message;
-        modalBackdrop.classList.remove('hidden');
+        modalBackdrop.classList.add('active');
     }
 
+    // Fechar modal
     modalCloseBtn.addEventListener('click', () => {
-        modalBackdrop.classList.add('hidden');
+        modalBackdrop.classList.remove('active');
     });
 
-    async function initializeFirebase() {
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            getAnalytics(app);
-            
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    userIdDisplay.textContent = userId;
-                    setupFirestoreListeners();
-                } else {
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        showModal("Erro de Autenticação", "Não foi possível autenticar. Por favor, verifique a chave de configuração.");
-                        console.error("Firebase auth error:", error);
-                    }
-                }
-            });
-        } catch (error) {
-            showModal("Erro de Inicialização", "Não foi possível inicializar o Firebase. Verifique sua configuração.");
-            console.error("Firebase init error:", error);
-        }
-    }
-
+    // Calcular preço por unidade
     function calculatePrice() {
         let price = parseFloat(priceInput.value);
         let quantity = parseFloat(quantityInput.value);
         let unit = unitSelect.value;
-        let pricePerUnit = 0;
-        let displayUnit = "";
+        let productName = productNameInput.value.trim();
+        
+        if (!productName) {
+            showModal("Atenção", "Por favor, informe o nome do produto.");
+            return;
+        }
         
         if (isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0) {
             resultDiv.classList.add('hidden');
+            showModal("Dados inválidos", "Por favor, informe preço e quantidade válidos.");
             return;
         }
 
+        let pricePerUnit = 0;
+        let displayUnit = "";
+        
         switch (unit) {
             case 'g':
                 pricePerUnit = (price / quantity) * 1000;
@@ -285,118 +308,147 @@
         }
 
         const formattedPrice = pricePerUnit.toFixed(2).replace('.', ',');
-        pricePerUnitSpan.textContent = `${displayUnit} ${formattedPrice}`;
+        pricePerUnitSpan.textContent = `${formattedPrice} ${displayUnit}`;
         resultDiv.classList.remove('hidden');
-    }
-
-    async function saveCalculation() {
-        const price = parseFloat(priceInput.value);
-        const quantity = parseFloat(quantityInput.value);
-        const unit = unitSelect.value;
-        const productName = productNameInput.value.trim();
         
-        if (isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0 || !productName) {
-            showModal("Erro ao Salvar", "Por favor, preencha todos os campos corretamente para salvar.");
-            return;
-        }
-        
-        const calculationData = {
-            productName: productName,
-            price: price,
-            quantity: quantity,
-            unit: unit,
-            pricePerUnit: price / quantity,
+        // Salvar cálculo atual para possível salvamento
+        currentCalculation = {
+            productName,
+            price,
+            quantity,
+            unit,
+            pricePerUnit,
+            displayUnit,
+            formattedPrice,
             timestamp: Date.now()
         };
         
-        try {
-            const path = `/artifacts/${appId}/users/${userId}/calculations`;
-            await addDoc(collection(db, path), calculationData);
-            showModal("Sucesso", "Cálculo salvo com sucesso!");
-        } catch (error) {
-            showModal("Erro de Conexão", "Não foi possível salvar o cálculo. Tente novamente.");
-            console.error("Error saving document:", error);
-        }
+        return currentCalculation;
     }
 
-    async function deleteCalculation(docId) {
-        try {
-            const path = `/artifacts/${appId}/users/${userId}/calculations/${docId}`;
-            await deleteDoc(doc(db, path));
-        } catch (error) {
-            showModal("Erro ao Deletar", "Não foi possível deletar o cálculo. Tente novamente.");
-            console.error("Error deleting document:", error);
+    // Salvar cálculo (simulado - substitua com sua lógica do Firebase)
+    function saveCalculation() {
+        if (!currentCalculation) {
+            showModal("Atenção", "Calcule primeiro o preço antes de salvar.");
+            return;
         }
+        
+        // Adicionar à lista de cálculos salvos
+        savedCalculations.push(currentCalculation);
+        
+        // Renderizar a lista
+        renderSavedCalculations();
+        
+        showModal("Sucesso", "Cálculo salvo com sucesso!");
+        
+        // Limpar campos
+        productNameInput.value = "";
+        priceInput.value = "";
+        quantityInput.value = "";
+        resultDiv.classList.add('hidden');
+        currentCalculation = null;
     }
 
-    function setupFirestoreListeners() {
-        const path = `/artifacts/${appId}/users/${userId}/calculations`;
-        const q = query(collection(db, path));
-
-        onSnapshot(q, (snapshot) => {
-            calculationsList.innerHTML = '';
-            const savedItems = [];
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                savedItems.push({
-                    id: doc.id,
-                    ...data
-                });
-            });
-
-            savedItems.sort((a, b) => b.timestamp - a.timestamp);
-
-            savedItems.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'calculation-item';
-                
-                const formattedPrice = (item.pricePerUnit).toFixed(2).replace('.', ',');
-                let displayUnit;
-                switch (item.unit) {
-                    case 'g': displayUnit = 'R$/kg'; break;
-                    case 'ml': displayUnit = 'R$/L'; break;
-                    case 'un': displayUnit = 'R$/un'; break;
-                    default: displayUnit = `R$/${item.unit}`; break;
-                }
-
-                li.innerHTML = `
-                    <div>
-                        <p class="font-medium text-gray-800">${item.productName}</p>
-                        <p class="text-sm text-gray-600">Preço: R$ ${item.price.toFixed(2).replace('.', ',')} | Qtd: ${item.quantity} ${item.unit}</p>
-                        <p class="text-sm text-blue-600 font-bold">Unidade: ${displayUnit} ${formattedPrice}</p>
+    // Renderizar cálculos salvos
+    function renderSavedCalculations() {
+        calculationsList.innerHTML = '';
+        
+        if (savedCalculations.length === 0) {
+            calculationsList.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum cálculo salvo ainda.</p>';
+            return;
+        }
+        
+        // Ordenar por preço por unidade (menor primeiro)
+        savedCalculations.sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+        
+        savedCalculations.forEach((calc, index) => {
+            const item = document.createElement('div');
+            item.className = 'calculation-item';
+            
+            // Destacar a melhor opção (mais barata)
+            if (index === 0) {
+                item.classList.add('best-option');
+            }
+            
+            item.innerHTML = `
+                <div class="flex-grow">
+                    <div class="flex items-center">
+                        <p class="font-medium text-gray-800">${calc.productName}</p>
+                        ${index === 0 ? '<span class="best-option-tag">Melhor opção</span>' : ''}
                     </div>
-                    <button class="delete-btn" data-id="${item.id}">X</button>
-                `;
-                
-                const deleteBtn = li.querySelector('.delete-btn');
-                deleteBtn.addEventListener('click', () => deleteCalculation(deleteBtn.dataset.id));
-                
-                calculationsList.appendChild(li);
-            });
-        }, (error) => {
-            console.error("Error listening to documents:", error);
-            showModal("Erro de Sincronização", "Não foi possível carregar seus dados. Por favor, recarregue a página.");
+                    <p class="text-sm text-gray-600">Preço: R$ ${calc.price.toFixed(2).replace('.', ',')} | Qtd: ${calc.quantity} ${calc.unit}</p>
+                    <p class="text-sm text-blue-600 font-bold">${calc.displayUnit} ${calc.formattedPrice}</p>
+                </div>
+                <button class="delete-btn" data-id="${calc.timestamp}">X</button>
+            `;
+            
+            const deleteBtn = item.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => deleteCalculation(calc.timestamp));
+            
+            calculationsList.appendChild(item);
         });
     }
 
+    // Deletar cálculo
+    function deleteCalculation(timestamp) {
+        savedCalculations = savedCalculations.filter(calc => calc.timestamp !== timestamp);
+        renderSavedCalculations();
+    }
+
+    // Event Listeners
+    calculateBtn.addEventListener('click', calculatePrice);
+    saveBtn.addEventListener('click', saveCalculation);
+
+    // Inicializar a aplicação
     document.addEventListener('DOMContentLoaded', () => {
-        initializeFirebase();
-        priceInput.addEventListener('input', calculatePrice);
-        quantityInput.addEventListener('input', calculatePrice);
-        unitSelect.addEventListener('change', calculatePrice);
-        saveBtn.addEventListener('click', saveCalculation);
+        renderSavedCalculations();
+        
+        // Adicionar alguns exemplos iniciais
+        savedCalculations = [
+            {
+                productName: "Sabão em Pó OMO",
+                price: 15.90,
+                quantity: 1.5,
+                unit: "kg",
+                pricePerUnit: 10.60,
+                displayUnit: "R$/kg",
+                formattedPrice: "10,60",
+                timestamp: Date.now() - 86400000 // 1 dia atrás
+            },
+            {
+                productName: "Sabão em Pó Brilhante",
+                price: 12.00,
+                quantity: 1,
+                unit: "kg",
+                pricePerUnit: 12.00,
+                displayUnit: "R$/kg",
+                formattedPrice: "12,00",
+                timestamp: Date.now() - 43200000 // 12 horas atrás
+            },
+            {
+                productName: "Sabão em Pó Progresso",
+                price: 18.50,
+                quantity: 2,
+                unit: "kg",
+                pricePerUnit: 9.25,
+                displayUnit: "R$/kg",
+                formattedPrice: "9,25",
+                timestamp: Date.now() - 21600000 // 6 horas atrás
+            }
+        ];
+        
+        renderSavedCalculations();
     });
 
+    // Simular funcionalidade offline com service worker
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                })
-                .catch(err => {
-                    console.log('Service Worker registration failed:', err);
-                });
-        });
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('Service Worker registrado com sucesso:', registration);
+            })
+            .catch(error => {
+                console.log('Falha ao registrar Service Worker:', error);
+            });
     }
 </script>
 
