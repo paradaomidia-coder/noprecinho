@@ -3,161 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No Precinho - Verificação de Firebase</title>
+    <title>No Precinho - Calculadora de Preço por Unidade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            min-height: 100vh;
-            padding: 1rem;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
         }
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             background-color: #ffffff;
             border-radius: 1.5rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 2rem;
             text-align: center;
         }
-        .status-card {
-            padding: 1.5rem;
-            border-radius: 1rem;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        .status-connected {
-            background-color: #d1fae5;
-            color: #065f46;
-            border: 2px solid #a7f3d0;
-        }
-        .status-disconnected {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 2px solid #fecaca;
-        }
-        .key-display {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin: 1rem 0;
-            font-family: monospace;
-            word-break: break-all;
-            font-size: 0.8rem;
-        }
-        .btn {
-            padding: 0.75rem 1.5rem;
+        input, select {
+            border: 2px solid #e5e7eb;
             border-radius: 0.75rem;
-            font-weight: 600;
+            padding: 0.75rem;
+            font-size: 1rem;
+            width: 100%;
             transition: all 0.2s;
-            cursor: pointer;
-            display: inline-block;
-            margin: 0.5rem;
         }
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
-        .btn-primary:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
+        .result-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border-radius: 1.5rem;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 12px rgba(5, 122, 85, 0.15);
         }
-        .btn-secondary {
-            background-color: #e5e7eb;
-            color: #4b5563;
+        .result-text {
+            font-size: 1.25rem;
+            font-weight: 600;
         }
-        .btn-secondary:hover {
-            background-color: #d1d5db;
+        .result-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: 0.5rem;
         }
-        .feature-list {
-            text-align: left;
-            margin: 1.5rem 0;
-        }
-        .feature-list li {
-            margin-bottom: 0.75rem;
+        .calculation-item {
+            background-color: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
             display: flex;
-            align-items: flex-start;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
         }
-        .feature-list li::before {
-            content: "✓";
-            color: #10b981;
+        .calculation-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .delete-btn {
+            background-color: #ef4444;
+            color: #fff;
             font-weight: bold;
-            margin-right: 0.5rem;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content {
+            transform: translateY(0);
+        }
+        .best-option {
+            border: 2px solid #10b981;
+            background-color: #ecfdf5;
+        }
+        .best-option-tag {
+            background-color: #10b981;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            margin-left: 0.5rem;
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="app-header flex items-center justify-center gap-3 mb-6">
-            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">$</div>
+        <div class="app-header">
+            <div class="app-icon">$</div>
             <h1 class="text-3xl font-bold text-gray-800">No Precinho</h1>
         </div>
         
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">Status do Firebase</h2>
+        <div class="mb-6 p-4 bg-blue-50 rounded-xl">
+            <p class="text-sm text-blue-700">Compare preços de produtos com embalagens diferentes e descubra qual opção oferece o melhor custo-benefício!</p>
+        </div>
         
-        <div id="status-card" class="status-card">
-            <div class="flex items-center gap-2 mb-2">
-                <div id="status-indicator" class="w-4 h-4 rounded-full bg-gray-300"></div>
-                <span id="status-text" class="font-medium">Verificando conexão...</span>
+        <div class="mb-4">
+            <label for="product-name" class="block text-left text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+            <input type="text" id="product-name" placeholder="Ex: Arroz, Sabão em Pó, Leite" class="w-full">
+        </div>
+
+        <div class="mb-4">
+            <label for="price" class="block text-left text-sm font-medium text-gray-700 mb-1">Preço Total (R$)</label>
+            <input type="number" id="price" placeholder="Ex: 15.50" step="0.01" min="0" class="w-full">
+        </div>
+
+        <div class="mb-4">
+            <label for="quantity" class="block text-left text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+            <div class="flex items-center">
+                <input type="number" id="quantity" placeholder="Ex: 500" step="0.01" min="0" class="flex-grow rounded-r-none">
+                <select id="unit" class="rounded-l-none text-gray-600 w-24">
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="L">L</option>
+                    <option value="ml">ml</option>
+                    <option value="un">un</option>
+                </select>
             </div>
-            <p id="status-desc" class="text-sm">Estamos verificando a conexão com o Firebase.</p>
+        </div>
+
+        <div id="result" class="result-box hidden">
+            <p class="result-text">Preço por unidade</p>
+            <p id="price-per-unit" class="result-price">R$ 0,00</p>
+        </div>
+
+        <div class="flex space-x-2 mt-6">
+            <button id="calculate-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:-translate-y-0.5">
+                📊 Calcular
+            </button>
+            <button id="save-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:-translate-y-0.5">
+                💾 Salvar
+            </button>
         </div>
         
-        <h3 class="text-lg font-medium text-gray-700 mb-2">Chave de API encontrada:</h3>
-        <div class="key-display">
-            AIzaSyB-wsClf0DUF0adE94Go3pjsPt-CyDjXf8
+        <div id="saved-calculations" class="mt-8 text-left">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Comparações Salvas</h2>
+            <div id="calculations-list" class="space-y-3"></div>
         </div>
-        
-        <p class="text-sm text-gray-600 mb-4">Esta chave está configurada para o projeto <span class="font-medium">noprecinho-app</span> no Firebase.</p>
-        
-        <div class="bg-blue-50 p-4 rounded-xl mb-6">
-            <h3 class="font-medium text-blue-800 mb-2">📋 Recomendações de Segurança:</h3>
-            <ul class="text-sm text-blue-700 list-disc list-inside">
-                <li>Restrinja sua chave de API no Console do Google Cloud</li>
-                <li>Configure regras de segurança no Firebase</li>
-                <li>Use variáveis de ambiente para armazenar chaves em produção</li>
-                <li>Revise regularmente as permissões da chave</li>
-            </ul>
-        </div>
-        
-        <h3 class="text-lg font-medium text-gray-700 mb-3">Funcionalidades da Calculadora:</h3>
-        <ul class="feature-list">
-            <li>Calcular preço por quilograma (R$/kg)</li>
-            <li>Calcular preço por litro (R$/L)</li>
-            <li>Calcular preço por unidade (R$/un)</li>
-            <li>Salvar cálculos para comparação futura</li>
-            <li>Identificar a opção mais econômica</li>
-        </ul>
-        
-        <div class="mt-6">
-            <a href="https://paradaomidia-coder.github.io/noprecinho/" class="btn btn-primary">Abrir Calculadora</a>
-            <a href="https://console.firebase.google.com/" class="btn btn-secondary" target="_blank">Console Firebase</a>
+
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>✨ Encontre o melhor preço para o seu bolso! ✨</p>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusIndicator = document.getElementById('status-indicator');
-            const statusText = document.getElementById('status-text');
-            const statusDesc = document.getElementById('status-desc');
-            const statusCard = document.getElementById('status-card');
-            
-            // Simular verificação de conexão com o Firebase
-            setTimeout(() => {
-                // Esta é uma simulação - em um caso real, você testaria a conexão real
-                statusIndicator.classList.remove('bg-gray-300');
-                statusIndicator.classList.add('bg-green-500');
-                statusText.textContent = 'Conectado ao Firebase';
-                statusDesc.textContent = 'Sua configuração do Firebase está funcionando corretamente.';
-                statusCard.classList.add('status-connected');
-            }, 2000);
+    <!-- Custom Alert/Modal -->
+    <div id="modal-backdrop" class="modal-backdrop">
+        <div class="modal-content">
+            <h3 id="modal-title" class="font-bold text-lg mb-2"></h3>
+            <p id="modal-message" class="text-sm text-gray-600 mb-4"></p>
+            <button id="modal-close" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, addDoc, deleteDoc, onSnapshot, collection, query, orderBy, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Set Firebase logging level to debug for development
+        setLogLevel('debug');
+
+        // DOM elements
+        const priceInput = document.getElementById('price');
+        const quantityInput = document.getElementById('quantity');
+        const unitSelect = document.getElementById('unit');
+        const productNameInput = document.getElementById('product-name');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const resultDiv = document.getElementById('result');
+        const pricePerUnitSpan = document.getElementById('price-per-unit');
+        const calculationsList = document.getElementById('calculations-list');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close');
+
+        // State variables
+        let currentCalculation = null;
+        let userId = null;
+        
+        // Custom modal function to replace alert()
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalBackdrop.classList.add('active');
+        }
+
+        modalCloseBtn.addEventListener('click', () => {
+            modalBackdrop.classList.remove('active');
         });
+
+        // Function to calculate price per unit
+        function calculatePrice() {
+            let price = parseFloat(priceInput.value);
+            let quantity = parseFloat(quantityInput.value);
+            let unit = unitSelect.value;
+            let productName = productNameInput.value.trim();
+            
+            if (!productName) {
+                showModal("Atenção", "Por favor, informe o nome do produto.");
+                return;
+            }
+            
+            if (isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0) {
+                resultDiv.classList.add('hidden');
+                showModal("Dados inválidos", "Por favor, informe preço e quantidade válidos.");
+                return;
+            }
+
+            let pricePerUnit = 0;
+            let displayUnit = "";
+            
+            switch (unit) {
+                case 'g':
+                    pricePerUnit = (price / quantity) * 1000;
+                    displayUnit = "R$/kg";
+                    break;
+                case 'ml':
+                    pricePerUnit = (price / quantity) * 1000;
+                    displayUnit = "R$/L";
+                    break;
+                case 'un':
+                    pricePerUnit = price / quantity;
+                    displayUnit = "R$/un";
+                    break;
+                case 'kg':
+                case 'L':
+                default:
+                    pricePerUnit = price / quantity;
+                    displayUnit = `R$/${unit}`;
+                    break;
+            }
+
+            const formattedPrice = pricePerUnit.toFixed(2).replace('.', ',');
+            pricePerUnitSpan.textContent = `R$ ${formattedPrice} ${displayUnit}`;
+            resultDiv.classList.remove('hidden');
+            
+            currentCalculation = {
+                productName,
+                price,
+                quantity,
+                unit,
+                pricePerUnit,
+                displayUnit,
+                formattedPrice,
+                timestamp: Date.now()
+            };
+        }
+
+        // Function to save a new calculation to Firestore
+        async function saveCalculation() {
+            if (!currentCalculation) {
+                showModal("Atenção", "Calcule primeiro o preço antes de salvar.");
+                return;
+            }
+
+            if (!userId) {
+                showModal("Erro", "Não foi possível autenticar o usuário. Tente novamente mais tarde.");
+                return;
+            }
+            
+            try {
+                const calculationsCollection = collection(db, `artifacts/${appId}/users/${userId}/calculations`);
+                await addDoc(calculationsCollection, currentCalculation);
+                showModal("Sucesso", "Cálculo salvo com sucesso!");
+                
+                // Clear inputs after saving
+                productNameInput.value = "";
+                priceInput.value = "";
+                quantityInput.value = "";
+                unitSelect.value = "kg";
+                resultDiv.classList.add('hidden');
+                currentCalculation = null;
+            } catch (e) {
+                showModal("Erro", "Erro ao salvar cálculo. Verifique sua conexão e tente novamente.");
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        // Function to delete a calculation from Firestore
+        async function deleteCalculation(docId) {
+            if (!userId) {
+                showModal("Erro", "Não foi possível autenticar o usuário. Tente novamente mais tarde.");
+                return;
+            }
+            
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/calculations`, docId);
+                await deleteDoc(docRef);
+            } catch (e) {
+                showModal("Erro", "Erro ao deletar cálculo. Verifique sua conexão.");
+                console.error("Error deleting document: ", e);
+            }
+        }
+
+        // Function to render saved calculations from Firestore
+        function renderSavedCalculations(calculations) {
+            calculationsList.innerHTML = '';
+            
+            if (calculations.length === 0) {
+                calculationsList.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum cálculo salvo ainda.</p>';
+                return;
+            }
+            
+            // Sort calculations by pricePerUnit (lowest first)
+            calculations.sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+            
+            calculations.forEach((calc, index) => {
+                const item = document.createElement('div');
+                item.className = 'calculation-item';
+                
+                if (index === 0) {
+                    item.classList.add('best-option');
+                }
+                
+                item.innerHTML = `
+                    <div class="flex-grow">
+                        <div class="flex items-center">
+                            <p class="font-medium text-gray-800">${calc.productName}</p>
+                            ${index === 0 ? '<span class="best-option-tag">Melhor opção</span>' : ''}
+                        </div>
+                        <p class="text-sm text-gray-600">Preço: R$ ${calc.price.toFixed(2).replace('.', ',')} | Qtd: ${calc.quantity} ${calc.unit}</p>
+                        <p class="text-sm text-blue-600 font-bold">R$ ${calc.formattedPrice} ${calc.displayUnit}</p>
+                    </div>
+                    <button class="delete-btn" data-id="${calc.id}">X</button>
+                `;
+                
+                const deleteBtn = item.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', () => deleteCalculation(calc.id));
+                
+                calculationsList.appendChild(item);
+            });
+        }
+
+        // Listeners for user actions
+        calculateBtn.addEventListener('click', calculatePrice);
+        saveBtn.addEventListener('click', saveCalculation);
+
+        // Firebase Auth and Firestore setup
+        async function setupApp() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser.uid;
+                
+                // Set up real-time listener for calculations
+                const calculationsCollection = collection(db, `artifacts/${appId}/users/${userId}/calculations`);
+                onSnapshot(calculationsCollection, (snapshot) => {
+                    const calculations = [];
+                    snapshot.forEach(doc => {
+                        calculations.push({ id: doc.id, ...doc.data() });
+                    });
+                    renderSavedCalculations(calculations);
+                }, (error) => {
+                    console.error("Error listening for documents: ", error);
+                    showModal("Erro", "Não foi possível carregar os dados. Verifique sua conexão.");
+                });
+            } catch (e) {
+                console.error("Error during authentication: ", e);
+                showModal("Erro de Autenticação", "Não foi possível conectar. Tente recarregar a página.");
+            }
+        }
+
+        // Start the application setup
+        window.onload = setupApp;
     </script>
 </body>
 </html>
+
